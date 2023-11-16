@@ -32,20 +32,25 @@ class Client:
     def sign_ssh_challenge(self, blob, identity):
         """Sign given blob using a private key on the device."""
         log.debug('blob: %r', blob)
-        msg = parse_ssh_blob(blob)
-        if msg['sshsig']:
-            log.info('please confirm "%s" signature for "%s" using %s...',
-                     msg['namespace'], identity.to_string(), self.device)
-        else:
-            log.debug('%s: user %r via %r (%r)',
-                      msg['conn'], msg['user'], msg['auth'], msg['key_type'])
-            log.debug('nonce: %r', msg['nonce'])
-            fp = msg['public_key']['fingerprint']
-            log.debug('fingerprint: %s', fp)
-            log.debug('hidden challenge size: %d bytes', len(blob))
+        try:
+            msg = parse_ssh_blob(blob)
+            if msg['sshsig']:
+                log.info('please confirm "%s" signature for "%s" using %s...',
+                         msg['namespace'], identity.to_string(), self.device)
+            else:
+                log.debug('%s: user %r via %r (%r)',
+                          msg['conn'], msg['user'], msg['auth'], msg['key_type'])
+                log.debug('nonce: %r', msg['nonce'])
+                fp = msg['public_key']['fingerprint']
+                log.debug('fingerprint: %s', fp)
+                log.debug('hidden challenge size: %d bytes', len(blob))
 
             log.info('please confirm user "%s" login to "%s" using %s...',
                      msg['user'].decode('ascii'), identity.to_string(),
+                     self.device)
+        except:
+            log.info('please confirm signing for "%s" using %s...',
+                     identity.to_string(),
                      self.device)
 
         with self.device:
